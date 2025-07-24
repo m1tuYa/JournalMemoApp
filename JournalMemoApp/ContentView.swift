@@ -16,10 +16,34 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selectedBoardId) {
-                ForEach(blocks.filter { $0.type == .board }) { board in
-                    Text(board.content)
-                        .foregroundColor(.black)
-                        .tag(board.id)
+                // 新しい「その他」セクションを追加
+                Section(header: Text("その他")) {
+                    Label("検索", systemImage: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    Label("設定", systemImage: "gearshape")
+                        .foregroundColor(.gray)
+                }
+
+                Section(header: Text("メニュー")) {
+                    Label("ホーム", systemImage: "house")
+                        .tag(UUID()) // 仮のID。必要に応じてフィルタ機能を追加
+                    Label("カレンダー", systemImage: "calendar")
+                        .foregroundColor(.gray)
+                }
+
+                Section(header: Text("ボード")) {
+                    ForEach(blocks.filter { $0.type == .board }) { board in
+                        Text(board.content)
+                            .foregroundColor(.black)
+                            .tag(board.id)
+                    }
+                }
+
+                Section(header: Text("タグ（仮）")) {
+                    Label("重要", systemImage: "tag")
+                        .foregroundColor(.gray)
+                    Label("未整理", systemImage: "tag")
+                        .foregroundColor(.gray)
                 }
             }
             .toolbar {
@@ -30,8 +54,9 @@ struct ContentView: View {
                 }) {
                     Image(systemName: "plus")
                 }
+                EditButton()
             }
-            .navigationTitle("Boards")
+            .navigationTitle("メニュー")
         } detail: {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -202,6 +227,15 @@ struct ContentView: View {
                                             .padding(4)
                                         }
                                         .cornerRadius(4)
+                                    }
+                                    .onMove { indices, newOffset in
+                                        let moved = indices.map { children[$0] }
+                                        for (i, movedBlock) in moved.enumerated() {
+                                            if let originalIndex = blocks.firstIndex(where: { $0.id == movedBlock.id }) {
+                                                blocks.remove(at: originalIndex)
+                                                blocks.insert(movedBlock, at: newOffset + i)
+                                            }
+                                        }
                                     }
                                 }
                             }
