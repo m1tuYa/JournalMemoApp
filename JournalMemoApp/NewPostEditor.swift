@@ -3,7 +3,7 @@ import SwiftUI
 struct EditorBlock: Identifiable {
     var id = UUID()
     var content: String
-    var type: Block.BlockType
+    var type: BlockType
 }
 
 struct NewPostEditor: View {
@@ -13,7 +13,7 @@ struct NewPostEditor: View {
 
     @State private var title: String = ""
     @State private var editorBlocks: [EditorBlock] = [
-        EditorBlock(content: "", type: Block.BlockType.text)
+        EditorBlock(content: "", type: BlockType.text)
     ]
 
     var body: some View {
@@ -38,11 +38,22 @@ struct NewPostEditor: View {
                         .padding(.horizontal)
                     
                     ForEach($editorBlocks) { $block in
-                        TextEditor(text: $block.content)
-                            .frame(minHeight: 200)
-                            .padding(.horizontal)
-                            .background(Color.clear)
-                            .cornerRadius(8)
+                        BlockView(
+                            block: Block.create(
+                                type: block.type,
+                                content: block.content,
+                                parentId: nil,
+                                order: 0
+                            ),
+                            onUpdate: { updated in
+                                if let i = editorBlocks.firstIndex(where: { $0.id == updated.id }) {
+                                    editorBlocks[i].content = updated.content
+                                }
+                            },
+                            onDelete: { deleted in
+                                editorBlocks.removeAll { $0.id == deleted.id }
+                            }
+                        )
                     }
                 }
                 .frame(maxWidth: 700)

@@ -6,6 +6,12 @@
 //
 
 import Foundation
+enum BlockStatus: String {
+    case draft
+    case published
+    case archived
+}
+typealias BlockType = Block.BlockType
 
 struct Block: Identifiable {
     enum BlockType: String {
@@ -39,7 +45,13 @@ extension Block {
         content: String = "",
         parentId: UUID? = nil,
         order: Int = 0,
-        style: String = "timeline"
+        status: BlockStatus = .draft,
+        tags: [String] = [],
+        isPinned: Bool = false,
+        isCollapsed: Bool = false,
+        style: String? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
     ) -> Block {
         return Block(
             id: UUID(),
@@ -47,21 +59,51 @@ extension Block {
             content: content,
             parentId: parentId,
             order: order,
-            createdAt: Date(),
-            updatedAt: Date(),
-            status: "draft",
-            tags: [],
-            isPinned: false,
-            isCollapsed: false,
-            style: style
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            status: status.rawValue,
+            tags: tags,
+            isPinned: isPinned,
+            isCollapsed: isCollapsed,
+            style: style ?? ""
+        )
+    }
+
+    static func createWithId(
+        id: UUID,
+        type: BlockType,
+        content: String = "",
+        parentId: UUID? = nil,
+        order: Int = 0,
+        status: BlockStatus = .draft,
+        tags: [String] = [],
+        isPinned: Bool = false,
+        isCollapsed: Bool = false,
+        style: String? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) -> Block {
+        return Block(
+            id: id,
+            type: type,
+            content: content,
+            parentId: parentId,
+            order: order,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            status: status.rawValue,
+            tags: tags,
+            isPinned: isPinned,
+            isCollapsed: isCollapsed,
+            style: style ?? ""
         )
     }
 
     static func createPost(content: String = "", parentId: UUID? = nil) -> Block {
-        create(type: .post, content: content, parentId: parentId, style: "timeline")
+        create(type: BlockType.post, content: content, parentId: parentId, style: "timeline")
     }
 
     static func createText(content: String = "", parentId: UUID) -> Block {
-        create(type: .text, content: content, parentId: parentId)
+        create(type: BlockType.text, content: content, parentId: parentId)
     }
 }

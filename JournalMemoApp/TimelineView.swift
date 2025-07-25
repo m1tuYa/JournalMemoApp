@@ -65,114 +65,19 @@ struct TimelineView: View {
                             HStack(alignment: .top, spacing: 0) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     ForEach(children) { block in
-                                        ZStack(alignment: .topLeading) {
-                                            if selectedBlockId == block.id {
-                                                Color.blue.opacity(0.1)
-                                            }
-                                            HStack(alignment: .top, spacing: 8) {
-                                                if selectedBlockId == block.id {
-                                                    Button(action: {
-                                                        activePopoverBlockId = block.id
-                                                    }) {
-                                                        Image(systemName: "plus")
-                                                            .foregroundColor(.gray)
-                                                    }
-                                                    .popover(isPresented: Binding(
-                                                        get: { activePopoverBlockId == block.id },
-                                                        set: { if !$0 { activePopoverBlockId = nil } }
-                                                    )) {
-                                                        VStack(alignment: .leading) {
-                                                            Menu("タイプを変更") {
-                                                                Button("見出し1にする") {
-                                                                    if let index = blocks.firstIndex(where: { $0.id == block.id }) {
-                                                                        blocks[index].type = .heading1
-                                                                    }
-                                                                    activePopoverBlockId = nil
-                                                                }
-                                                                Button("見出し2にする") {
-                                                                    if let index = blocks.firstIndex(where: { $0.id == block.id }) {
-                                                                        blocks[index].type = .heading2
-                                                                    }
-                                                                    activePopoverBlockId = nil
-                                                                }
-                                                                Button("テキストにする") {
-                                                                    if let index = blocks.firstIndex(where: { $0.id == block.id }) {
-                                                                        blocks[index].type = .text
-                                                                    }
-                                                                    activePopoverBlockId = nil
-                                                                }
-                                                                Button("リストにする") {
-                                                                    if let index = blocks.firstIndex(where: { $0.id == block.id }) {
-                                                                        blocks[index].type = .list
-                                                                    }
-                                                                    activePopoverBlockId = nil
-                                                                }
-                                                            }
-                                                            Button("複製") {
-                                                                if let original = blocks.first(where: { $0.id == block.id }) {
-                                                                    let duplicated = Block(
-                                                                        id: UUID(),
-                                                                        type: original.type,
-                                                                        content: original.content,
-                                                                        parentId: original.parentId,
-                                                                        order: (blocks.filter { $0.parentId == original.parentId }.count),
-                                                                        createdAt: Date(),
-                                                                        updatedAt: Date(),
-                                                                        status: original.status,
-                                                                        tags: original.tags,
-                                                                        isPinned: original.isPinned,
-                                                                        isCollapsed: original.isCollapsed,
-                                                                        style: original.style
-                                                                    )
-                                                                    blocks.append(duplicated)
-                                                                }
-                                                                activePopoverBlockId = nil
-                                                            }
-                                                            Button("削除", role: .destructive) {
-                                                                if let index = blocks.firstIndex(where: { $0.id == block.id }) {
-                                                                    blocks.remove(at: index)
-                                                                }
-                                                                activePopoverBlockId = nil
-                                                            }
-                                                        }
-                                                        .padding()
-                                                    }
-                                                } else {
-                                                    Color.clear.frame(width: 30)
+                                        BlockView(
+                                            block: block,
+                                            onUpdate: { updatedBlock in
+                                                if let index = blocks.firstIndex(where: { $0.id == updatedBlock.id }) {
+                                                    blocks[index] = updatedBlock
                                                 }
-
-                                                switch block.type {
-                                                case .heading1:
-                                                    Text(block.content)
-                                                        .font(.title)
-                                                        .foregroundColor(.black)
-                                                        .onTapGesture { selectedBlockId = block.id }
-                                                case .heading2:
-                                                    Text(block.content)
-                                                        .font(.title2)
-                                                        .foregroundColor(.black)
-                                                        .onTapGesture { selectedBlockId = block.id }
-                                                case .text:
-                                                    Text(block.content)
-                                                        .foregroundColor(.black)
-                                                        .onTapGesture { selectedBlockId = block.id }
-                                                case .list:
-                                                    Text("• \(block.content)")
-                                                        .foregroundColor(.black)
-                                                        .onTapGesture { selectedBlockId = block.id }
-                                                case .checkbox:
-                                                    HStack {
-                                                        Image(systemName: "square")
-                                                        Text(block.content).foregroundColor(.black)
-                                                    }
-                                                    .onTapGesture { selectedBlockId = block.id }
-                                                default:
-                                                    EmptyView()
+                                            },
+                                            onDelete: { deletedBlock in
+                                                if let index = blocks.firstIndex(where: { $0.id == deletedBlock.id }) {
+                                                    blocks.remove(at: index)
                                                 }
                                             }
-                                            .padding(4)
-                                        }
-                                        .cornerRadius(4)
+                                        )
                                     }
                                     .onMove { indices, newOffset in
                                         let moved = indices.map { children[$0] }
