@@ -16,7 +16,7 @@ struct Block: Identifiable {
         case heading2
         case list
         case checkbox
-        case drawing
+        // Drawing blocks are now expressed by setting the `style` property to "handwriting" rather than using a separate type.
     }
 
     let id: UUID
@@ -30,7 +30,7 @@ struct Block: Identifiable {
     var tags: [String]
     var isPinned: Bool
     var isCollapsed: Bool
-    var style: String
+    var style: String // e.g., "timeline", "mindmap", "handwriting"
 }
 
 extension Block {

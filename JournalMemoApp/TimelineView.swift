@@ -1,4 +1,3 @@
-// 🛠️ 修正内容: 新規ポスト作成ボタンからポスト編集画面（PostEditorView）へ遷移する機能を追加
 import SwiftUI
 
 struct TimelineView: View {
@@ -227,4 +226,3 @@ struct TimelineView: View {
         return formatter.string(from: date)
     }
 }
-
