@@ -18,50 +18,68 @@ struct NewPostEditor: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Button("キャンセル") {
-                    dismiss()
-                }
-                Spacer()
-                Button("ポスト") {
-                    addNewPost()
-                    dismiss()
-                }
-                .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
-            .padding()
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    TextField("無題", text: $title)
-                        .font(.system(size: 32, weight: .bold))
-                        .padding(.horizontal)
-                    
-                    ForEach($editorBlocks) { $block in
-                        BlockView(
-                            block: Block.create(
-                                type: block.type,
-                                content: block.content,
-                                parentId: nil,
-                                order: 0
-                            ),
-                            onUpdate: { updated in
-                                if let i = editorBlocks.firstIndex(where: { $0.id == updated.id }) {
-                                    editorBlocks[i].content = updated.content
-                                }
-                            },
-                            onDelete: { deleted in
-                                editorBlocks.removeAll { $0.id == deleted.id }
-                            }
-                        )
-                    }
-                }
-                .frame(maxWidth: 700)
-                .padding(.vertical, 40)
-                .padding(.horizontal)
-            }
+            headerView()
+            scrollContent()
         }
         .background(Color(UIColor.systemGroupedBackground))
+    }
+
+    @ViewBuilder
+    private func headerView() -> some View {
+        HStack {
+            Button("キャンセル") {
+                dismiss()
+            }
+            Spacer()
+            Button("ポスト") {
+                addNewPost()
+                dismiss()
+            }
+            .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        .padding()
+    }
+
+    @ViewBuilder
+    private func scrollContent() -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                TextField("無題", text: $title)
+                    .font(.system(size: 32, weight: .bold))
+                    .padding(.horizontal)
+
+                ForEach($editorBlocks) { $block in
+                    blockView(block: block)
+                }
+            }
+            .frame(maxWidth: 700)
+            .padding(.vertical, 40)
+            .padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    private func blockView(block: EditorBlock) -> some View {
+        BlockView(
+            block: Block.create(
+                type: block.type,
+                content: block.content,
+                parentId: nil,
+                order: 0
+            ),
+            onUpdate: { updated in
+                if let i = editorBlocks.firstIndex(where: { $0.id == updated.id }) {
+                    editorBlocks[i].content = updated.content
+                }
+            },
+            onDelete: { deleted in
+                editorBlocks.removeAll { $0.id == deleted.id }
+            },
+            blocks: .constant([]),
+            draggedBlockId: .constant(nil),
+            dropTargetBlockId: .constant(nil),
+            onMove: { _, _ in }
+        )
     }
 
     private func addNewPost() {
