@@ -44,17 +44,8 @@ struct BlockView: View {
             .font(font)
             .padding(.vertical, -4)
             .focused($isFocused)
-            .disabled(isSelected)
-            .onDrop(
-                of: [UTType.blockID],
-                delegate: BlockDropDelegate(
-                    targetBlock: block,
-                    blocks: $blocks,
-                    draggedBlockId: $draggedBlockId,
-                    dropTargetBlockId: $dropTargetBlockId,
-                    onMove: onMove
-                )
-            )
+            .disabled(draggedBlockId != nil) // Disable editing while dragging
+            .onDrop(of: [UTType.text.identifier], isTargeted: nil) { _ in false } // Prevent drop into the TextEditor
     }
 
     @ViewBuilder
@@ -145,13 +136,13 @@ struct BlockView: View {
                 : nil
             )
         }
-        .overlay(
-            Rectangle()
-                .fill(Color.blue)
-                .frame(height: 2)
-                .opacity(dropTargetBlockId == block.id ? 1.0 : 0.0)
-                .padding(.top, -1),
-            alignment: .bottom
-        )
+        .overlay(alignment: .top) {
+            if draggedBlockId != nil && dropTargetBlockId == block.id {
+                Rectangle()
+                    .fill(Color.blue)
+                    .frame(height: 4)
+                    .zIndex(10)
+            }
+        }
     }
 }
